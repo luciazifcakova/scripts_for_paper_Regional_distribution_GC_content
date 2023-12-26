@@ -1,0 +1,23 @@
+###soft mask genomes with *.tbl output of Dfam-TET container
+#!/bin/bash
+#SBATCH --job-name=6masking
+#SBATCH --partition=compute
+#SBATCH --time=3-0
+#SBATCH --mem-per-cpu=10G
+#SBATCH --cpus-per-task=20
+#SBATCH --mail-user=lucia.zifcakova@oist.jp
+#SBATCH --mail-type=BEGIN,FAIL,END
+#SBATCH --array=0-6
+#SBATCH --output=./6masking_%A-%a.out
+# command to run
+files=(/bucket/MillerU/Zifcakova/masked_mollusca_genomes/RM*/*.fna.ori.out)
+file=${files[${SLURM_ARRAY_TASK_ID}]}
+file1=${file/fna.ori.out/fna}
+out=$(basename -s .fna.ori.out $file) 
+
+#create repeat position file form repeat modeler/repeat masker
+sed 1d ${file}|sed 1d|sed 1d|awk '{print $5,$6,$7}' OFS="\t" > /flash/MillerU/${out}_repeat_postions.bed
+
+#soft mask genome
+bedtools/v2.29.2
+bedtools maskfasta -soft -fi ${file1} -bed /flash/MillerU/${out}_repeat_postions.bed -fo /flash/MillerU/${out}_soft_masked.fa
