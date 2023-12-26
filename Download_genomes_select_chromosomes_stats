@@ -1,0 +1,41 @@
+###download NCBI mollusca genomes; https://github.com/kblin/ncbi-genome-download:
+
+#!/bin/bash
+#SBATCH --job-name=mollusca_download_ncbi_genomes
+#SBATCH --partition=largemem
+#SBATCH --time=7-0
+#SBATCH --mem=120G
+#SBATCH --cpus-per-task=20
+#SBATCH --mail-user=lucia.zifcakova@oist.jp
+#SBATCH --mail-type=BEGIN,FAIL,END
+#SBATCH --output=/flash/MillerU/mollusca_download_ncbi_genomes.out
+
+# create a temporary directory for this job and save the name
+tempdir=$(mktemp -d /flash/MillerU/mollusca_download_ncbi_genomes.XXXXXX)
+
+# enter the temporary directory
+cd $tempdir
+
+ncbi-genome-download all --assembly-accessions /bucket/MillerU/Zifcakova/databases/Genebank_genomes/mollusca_genomes_genbank_to_download --section genbank --formats fasta --parallel 20 --output-folder $tempdir
+
+# copy our result back to Bucket. We use "scp" to copy the data 
+# back  as bucket isn't writable directly from the compute nodes.
+scp -r $tempdir deigo:/bucket/MillerU/Zifcakova/databases/Genebank_genomes
+
+#remove temp dir
+rm -r $tempdir
+
+
+
+
+###count all sequences (seqs) in mollusca genomes
+grep -c ">" ls GCA_*/*.fna > seq_count_mollusca_genomes
+
+###basic seqs stats with seqkit
+srun -p short -t 0-1 -c 20 --mem=100G --pty bash 
+
+ml bioinfo-ugrp-modules 
+ml DebianMed/11.2
+ml seqkit/0.15.0+ds-2+b5
+
+seqkit stats /bucket/MillerU/Zifcakova/databases/databases/Genebank_genomes/mollusca_download_ncbi_genomes/genbank/invertebrate/GCA_*/*.fna -a -T -j 20 > seqkit_stats_mollusca_genomes
