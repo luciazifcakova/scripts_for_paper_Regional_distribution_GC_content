@@ -1,0 +1,25 @@
+###download version 1.7 of container with RepeatMasker and other software
+curl -sSLO https://github.com/Dfam-consortium/TETools/raw/master/dfam-tetools.sh
+chmod +x dfam-tetools.sh
+
+
+#!/bin/bash
+#SBATCH --job-name=chobotnica_repeatModeler_masker
+#SBATCH --partition=largemem
+#SBATCH --time=10-0
+#SBATCH --mem-per-cpu=10G
+#SBATCH --cpus-per-task=20
+#SBATCH --mail-user=lucia.zifcakova@oist.jp
+#SBATCH --mail-type=BEGIN,FAIL,END
+#SBATCH --output=./chobotnica_repeatModeler_masker.out
+#SBATCH --dependency="singleton"
+
+ml bioinfo-ugrp-modules
+ml DebianMed
+ml singularity
+
+singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif BuildDatabase -name /flash/MillerU/GCA_006345805.1_ASM634580v1_genomic /bucket/MillerU/Zifcakova/masked_mollusca_genomes/GCA_006345805.1_ASM634580v1_genomic.fna
+
+singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif RepeatModeler -database /flash/MillerU/GCA_006345805.1_ASM634580v1_genomic -pa 20 -recoverDir /flash/MillerU/GCA_006345805.1_ASM634580v1 -LTRStruct
+
+singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif RepeatMasker /bucket/MillerU/Zifcakova/masked_mollusca_genomes/GCA_006345805.1_ASM634580v1_genomic.fna -lib /flash/MillerU/RM_*/consensi.fa -pa 20 -no_is -dir /flash/MillerU/RM_out
