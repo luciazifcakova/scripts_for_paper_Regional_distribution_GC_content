@@ -22,4 +22,4 @@ singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-te
 
 singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif RepeatModeler -database /flash/MillerU/GCA_006345805.1_ASM634580v1_genomic -pa 20 -recoverDir /flash/MillerU/GCA_006345805.1_ASM634580v1 -LTRStruct
 
-singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif RepeatMasker /bucket/MillerU/Zifcakova/masked_mollusca_genomes/GCA_006345805.1_ASM634580v1_genomic.fna -lib /flash/MillerU/RM_*/consensi.fa -pa 20 -no_is -dir /flash/MillerU/RM_out
+singularity exec /bucket/MillerU/Zifcakova/software/singularity.cacheDir/dfam-tetools-latest.sif RepeatMasker /bucket/MillerU/Zifcakova/masked_mollusca_genomes/GCA_006345805.1_ASM634580v1_genomic.fna -lib /flash/MillerU/RM_*/consensi.fa.classified -pa 20 -no_is -dir /flash/MillerU/RM_out
