@@ -1,0 +1,258 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.read_csv('/Users/lucia/Documents/s_les_TE_sum_GC.tab',sep="\t")
+
+# Plotting
+fig, ax1 = plt.subplots()
+#plt.figure().set_figwidth(15)
+# Scatter plot with 'Total Sum BP' on the first y-axis
+ax1.scatter(df['S_les_TE'], df['total sum in bp'], color='blue', label='Total sum in bp', marker='o')
+ax1.set_yscale('log')  # Set y-axis to log scale
+ax1.set_xlabel('S_les_TE')
+plt.xticks(rotation=90)
+ax1.set_ylabel('Total sum in bp (log scale)', color='blue')
+ax1.tick_params('y', colors='blue')
+
+# Create a second y-axis for 'GC%'
+ax2 = ax1.twinx()
+ax2.scatter(df['S_les_TE'], df['GC%'], color='red', label='GC%', marker='s')
+ax2.set_ylabel('GC%', color='red')
+ax2.axhline(y=34.89, color='red', linestyle='--', label='Threshold')
+plt.gcf().set_figwidth(15)
+# Show the plot
+plt.title('S.lessoniana total TE length in bp vs GC%')
+#plt.show()
+plt.savefig(f'/Users/lucia/Documents/cephalopod_GC_paper/S.lessoniana_total_TE_length_in_bp_vs_GC%.png',bbox_inches='tight')
+plt.close()
+
+
+
+
+import os
+import pandas as pd
+
+# Path to the directories
+directory1 = "/Users/lucia/Documents/lenght_sum"
+directory2 = "/Users/lucia/Documents/average"
+
+# Get a list of file names in each directory
+files1 = os.listdir(directory1)
+files2 = os.listdir(directory2)
+
+# Loop through the files and merge based on the common column
+# Extract common part of file names
+common_files = set([f.split("_whole_sum")[0] for f in files1]).intersection([f.split("_average")[0] for f in files2])
+
+# Loop through the common files and merge based on the common column
+for common_file in common_files:
+    file1 = f"{common_file}_whole_sum"
+    file2 = f"{common_file}_average"
+    #print(file1)
+    # Load data from the two files
+    path1 = os.path.join(directory1, file1)
+    path2 = os.path.join(directory2, file2)
+     
+    df1 = pd.read_csv(path1, delim_whitespace=True, header=None, names=['TE', 'total sum in bp'])
+    df2 = pd.read_csv(path2, delim_whitespace=True, header=None, names=['TE', 'column2', 'GC%'])
+    
+        # Merge the two dataframes based on the common column
+    merged_df = pd.merge(df1[['TE', 'total sum in bp']], df2[['TE', 'GC%']], on='TE')
+
+        # Save the merged dataframe to a new file
+    merged_path = f"/Users/lucia/Documents/{file1}"
+    merged_df.to_csv(merged_path, sep="\t", index=False)
+
+
+
+
+
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Directory containing your files
+directory = "/Users/lucia/Documents/cephalopod_GC_paper/TE_GC_figs/data"
+
+# Get a list of file names
+files = [f for f in os.listdir(directory) if f.endswith("_whole_sum")]
+df3 = pd.read_csv('/Users/lucia/Documents/mollusca_GC_genome.tab', sep="\t")
+# Loop over files
+for file in files:
+    file_path = os.path.join(directory, file)
+
+    # Read data from the file
+    df = pd.read_csv(file_path, sep="\t")
+    #df = df.sort_values(by='total sum in bp')
+    df = df.sort_values(by='GC%')
+    # Plotting
+    fig, ax1 = plt.subplots()
+
+    # Scatter plot with 'Total Sum BP' on the first y-axis
+    ax1.scatter(df['TE'], df['total sum in bp'], color='blue', label='Total sum in bp', marker='o')
+    ax1.set_yscale('log')  # Set y-axis to log scale
+    ax1.set_xlabel('TE')
+    plt.xticks(rotation=90)
+    ax1.set_ylabel('Total sum in bp (log scale)', color='blue')
+    ax1.tick_params('y', colors='blue')
+    # Assuming df3 is loaded here, adjust the path and column names accordingly
+    
+    # Extract common ID (partial file name)
+    common_id = file.split("_whole_sum")[0]
+        
+    # Create a second y-axis for 'GC%'
+    ax2 = ax1.twinx()
+    ax2.scatter(df['TE'], df['GC%'], color='red', label='GC%', marker='s')
+    ax2.set_ylabel('GC%', color='red')
+    # Get the corresponding row from df3 based on the common ID
+    threshold_row = df3[df3['ID'].str.contains(common_id)]
+    # Add a red dashed horizontal line using the GC% value from df3
+    if not threshold_row.empty:
+        threshold_value = threshold_row['GC%'].values[0]
+        ax2.axhline(y=threshold_value, color='red', linestyle='--', label='Genome_GC%')
+    plt.gcf().set_figwidth(15)
+
+    # Show the plot
+    plt.title(f'{file} total TE length in bp vs GC%')
+    plt.savefig(f'/Users/lucia/Documents/{file}_plot4_1.png', bbox_inches='tight')
+    plt.close()
+
+
+
+
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Directory containing your files
+directory = "/Users/lucia/Documents"
+
+# Get a list of file names
+files = [f for f in os.listdir(directory) if f.endswith("_whole_sum")]
+
+# Loop over files
+for file in files:
+    file_path = os.path.join(directory, file)
+
+    # Read data from the file
+    df = pd.read_csv(file_path, sep="\t")
+    df = df.sort_values(by='total sum in bp')
+    # Plotting
+    fig, ax1 = plt.subplots()
+
+    # Scatter plot with 'Total Sum BP' on the first y-axis
+    ax1.scatter(df['total sum in bp'], df['GC%'], color='blue', label='Total sum in bp', marker='o')
+    ax1.set_xscale('log')  # Set y-axis to log scale
+    ax1.set_xlabel('TE')
+    #plt.xticks(rotation=90)
+    ax1.set_ylabel('GC%', color='blue')
+    ax1.set_xlabel('Total sum in bp (log scale)', color='blue')
+    ax1.tick_params('y', colors='blue')
+    #ax1.axhline(y=df3, color='red', linestyle='--', label='Threshold')
+    # Create a second y-axis for 'GC%'
+    #ax2 = ax1.twinx()
+    #ax2.scatter(df['TE'], df['GC%'], color='red', label='GC%', marker='s')
+    #ax2.set_ylabel('GC%', color='red')
+    #ax2.axhline(y=34.89, color='red', linestyle='--', label='Threshold')
+    plt.gcf().set_figwidth(15)
+
+    # Show the plot
+    plt.title(f'{file} total TE length in bp vs GC%')
+    plt.savefig(f'/Users/lucia/Documents/{file}_plot2.png', bbox_inches='tight')
+    plt.close()
+
+
+
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Directory containing your files
+directory = "/Users/lucia/Documents"
+
+# Get a list of file names
+files = [f for f in os.listdir(directory) if f.endswith("_whole_sum")]
+
+# Loop over files
+for file in files:
+    file_path = os.path.join(directory, file)
+
+    # Read data from the file
+    df = pd.read_csv(file_path, sep="\t")
+    df = df.sort_values(by='total sum in bp')
+
+    # Plotting
+    fig, ax1 = plt.subplots()
+
+    # Scatter plot with 'Total Sum BP' on the first y-axis
+    ax1.scatter(df['total sum in bp'], df['GC%'], color='blue', label='Total sum in bp', marker='o')
+    ax1.set_xscale('log')  # Set y-axis to log scale
+    ax1.set_xlabel('Total sum in bp (log scale)')
+    ax1.set_ylabel('GC%', color='blue')
+    ax1.tick_params('y', colors='blue')
+
+    # Create horizontal lines for each 10%
+    for i in range(20, 80, 10):
+        ax1.axhline(y=i, color='blue', linestyle='--', label=f'{i}% line')
+
+    plt.gcf().set_figwidth(15)
+
+    # Show the plot
+    plt.title(f'{file} total TE length in bp vs GC%')
+    plt.savefig(f'/Users/lucia/Documents/{file}_plot3.png', bbox_inches='tight')
+    plt.close()
+
+
+
+
+
+
+import os
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Directory containing your files
+directory = "/Users/lucia/Documents/cephalopod_GC_paper/TE_GC_figs/data"
+
+# Get a list of file names
+files = [f for f in os.listdir(directory) if f.endswith("_whole_sum")]
+
+# Assuming df3 is loaded here, adjust the path and column names accordingly
+df3 = pd.read_csv('/Users/lucia/Documents/mollusca_GC_genome.tab', sep="\t")
+
+# Loop over files
+for file in files:
+    file_path = os.path.join(directory, file)
+
+    # Read data from the file
+    df = pd.read_csv(file_path, sep="\t")
+    df = df.sort_values(by='total sum in bp')
+    
+    # Extract common ID (partial file name)
+    common_id = file.split("_whole_sum")[0]
+
+    # Get the corresponding row from df3 based on the common ID
+    threshold_row = df3[df3['ID'].str.contains(common_id)]
+
+    # Plotting
+    fig, ax1 = plt.subplots()
+
+    # Scatter plot with 'Total Sum BP' on the first y-axis
+    ax1.scatter(df['total sum in bp'], df['GC%'], color='blue', label='Total sum in bp', marker='o')
+    ax1.set_xscale('log')  # Set y-axis to log scale
+    ax1.set_xlabel('TE')
+    ax1.set_ylabel('GC%', color='blue')
+    ax1.set_xlabel('Total sum in bp (log scale)', color='blue')
+    ax1.tick_params('y', colors='blue')
+
+    # Add a red dashed horizontal line using the GC% value from df3
+    if not threshold_row.empty:
+        threshold_value = threshold_row['GC%'].values[0]
+        ax1.axhline(y=threshold_value, color='red', linestyle='--', label='Genome_GC%')
+
+    plt.gcf().set_figwidth(15)
+
+    # Show the plot
+    plt.title(f'{file} total TE length in bp vs GC%')
+    plt.savefig(f'/Users/lucia/Documents/{file}_plot5.png', bbox_inches='tight')
+    plt.close()
