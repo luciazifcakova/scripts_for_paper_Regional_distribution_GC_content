@@ -1,0 +1,2 @@
+# scripts_for_paper_Regional_distribution_GC_content
+additional scripts for calculating supplementary figures and tables
