@@ -1,0 +1,23 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import os
+# Replace 'your_dataframe.csv' with the path to your actual CSV file
+df = pd.read_csv('/Users/lucia/Documents/cephalopod_GC_paper/GC_TE_box_plot.csv')
+
+# Iterate over numerical columns
+for col in df.columns[2:]:  # Assuming numerical columns start from the third column
+    # Create a new DataFrame for the current column
+    df_col = pd.DataFrame({
+        'Family': df['Family'],
+        'Value': df[col]
+    })
+
+    # Plot box plot with seaborn
+    plt.figure()
+    ax = sns.boxplot(x='Value', y='Family', data=df_col, showfliers=False)  # Set showfliers to False to exclude outliers
+    plt.title(f'Box Plot - {col}')
+    
+    # Save the plot with the correct filename
+    plt.savefig(f'/Users/lucia/Documents/cephalopod_GC_paper/Box_Plot_{col}.png',bbox_inches='tight')
+    plt.close()
