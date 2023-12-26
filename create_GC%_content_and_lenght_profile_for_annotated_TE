@@ -1,0 +1,48 @@
+#!/bin/bash
+#SBATCH --job-name=GC_length_consensi_classified
+#SBATCH --partition=compute
+#SBATCH --time=3-0
+#SBATCH --mem-per-cpu=10G
+#SBATCH --cpus-per-task=20
+#SBATCH --mail-user=lucia.zifcakova@oist.jp
+#SBATCH --mail-type=BEGIN,FAIL,END
+#SBATCH --array=0-17
+#SBATCH --output=./GC_length_consensi_classified_%A-%a.out
+
+files=(/bucket/MillerU/Zifcakova/masked_mollusca_genomes/*/consensi.fa.classified)
+file=${files[${SLURM_ARRAY_TASK_ID}]}
+dir="$( basename "$( dirname "$file" )" )"
+    newname="$dir/${dir}_${file/}"
+
+ml bioinfo-ugrp-modules
+ml DebianMed
+ml seqkit
+seqkit fx2tab -n -g -l ${file} > ${dir}
+
+
+
+
+#!/bin/bash
+#SBATCH --job-name=sum3GC_length_average
+#SBATCH --partition=compute
+#SBATCH --time=1-0
+#SBATCH --mem-per-cpu=10G
+#SBATCH --cpus-per-task=20
+#SBATCH --mail-user=lucia.zifcakova@oist.jp
+#SBATCH --mail-type=BEGIN,FAIL,END
+#SBATCH --array=0-26
+#SBATCH --output=./sum3GC_length_average_%A-%a.out
+
+files=(/bucket/MillerU/Zifcakova/masked_mollusca_genomes/GC_lenght/*_whole)
+file=${files[${SLURM_ARRAY_TASK_ID}]}
+out=$(basename $file)
+
+#awk -F"#" '{print $2}' OFS="\t" ${file}|awk '{ gsub(/ /,""); print $0}' OFS="\t"| awk -F'[[(]' '{print $1}' OFS="\t" > ${out}_head
+
+#awk -F"#" '{print $2}' OFS="\t" ${file}|awk '{ gsub(/ /,""); print $0}' OFS="\t"| awk '{print $(NF-1),$NF}' OFS="\t" > ${out}_body
+
+#pr -m -t ${out}_head ${out}_body| awk '{ gsub(/ /,""); print $0}' OFS="\t" > ${out}_whole
+
+#awk '{a[$1]+=$2; b[$1]+=$3; c[$1]++} END{for(i in a) print i, a[i]/c[i] , b[i]/c[i]}' OFS="\t" ${out}_whole > ${out}_average
+
+awk '{ sums[$1] += $2 } END { for (key in sums) print key, sums[key] }' OFS="\t" ${file} > ${out}_sum
