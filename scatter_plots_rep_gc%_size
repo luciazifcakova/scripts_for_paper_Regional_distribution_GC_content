@@ -1,0 +1,208 @@
+import pandas as pd
+import numpy as np
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+import csv
+df = pd.read_csv('/Users/lucia/Documents/Anadara_kagoshimensis_1000.csv', names=['Index', 'Chr', 'GC','rep','size Mbp'])
+#df.head()
+x = df['size Mbp']/1000000
+y = df['GC']*100
+z = df['rep']*100
+name= "Anadara_kagoshimensis"
+fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(16, 3))
+
+# GC%(y) x chromosome size(x)
+axes[0].scatter(x, y)
+axes[0].set_title(name)
+axes[0].set_xlabel('Chromosome size (Mbp)')
+axes[0].set_ylabel('GC%')
+
+
+# REP%(z) x chromosome size (x)
+axes[1].scatter(x, z)
+axes[1].set_title(name)
+axes[1].set_xlabel('Chromosome size (Mbp)')
+axes[1].set_ylabel('Repetitive fraction (%)')
+
+
+# REP%(z) x GC%(y)
+axes[2].scatter(z, y)
+axes[2].set_title(name)
+axes[2].set_xlabel('Repetitive fraction (%)')
+axes[2].set_ylabel('GC%')
+
+fig.savefig('/Users/lucia/Documents/{}_scatter_plot.png'.format(name), bbox_inches='tight')
+
+# Loop through each subplot and plot scatter plot with polynomial regression
+for i, (value) in enumerate(zip([x, y,z])):
+    # Plot the scatter plot
+    axes[i].scatter(x, y)
+
+    # Fit a polynomial regression (change the degree as needed)
+    degree = 2  # you can adjust the degree of the polynomial
+    coefficients = np.polyfit(x, y, degree)
+    poly_eq = np.poly1d(coefficients)
+
+    # Calculate R-squared value
+    y_pred = poly_eq(x)
+    r2 = r2_score(y, y_pred)
+
+    # Plot the polynomial regression curve
+    x_line = np.linspace(min(x), max(x), 100)
+    y_line = poly_eq(x_line)
+    axes[i].plot(x_line, y_line, label=f'Polynomial Regression (Degree {degree})\nR² = {r2:.4f}')
+
+    # Display the equation and R-squared value on the plot
+    equation = f'${"%.4f" % coefficients[0]} + {"%.4f" % coefficients[1]}x + {"%.4f" % coefficients[2]}x^2$'
+    axes[i].text(0.5, 0.85, equation, ha='center', va='center', transform=axes[i].transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+    axes[i].text(0.5, 0.75, f'R² = {r2:.4f}', ha='center', va='center', transform=axes[i].transAxes)
+
+    # Set subplot title and labels
+    axes[i].set_title(name)
+    axes[i].set_xlabel('X-axis Label')
+    axes[i].set_ylabel(f'Y-axis Label {i+1}')
+    axes[i].legend()
+
+# Adjust layout and show the plo
+plt.tight_layout()
+#plt.savefig('/Users/lucia/Documents/cephalopod_GC_paper/for_GC_rep_chrom_plots/Achatina2_scatter_plot.png')
+#plt.close()
+plt.show()
+
+plt.scatter(x, y, label='Scatter Plot with Polynomial Regression')
+plt.title(name)
+plt.xlabel('Chromosome size')
+plt.ylabel('GC%')
+degree = 4  # you can adjust the degree of the polynomial
+coefficients = np.polyfit(x, y, degree) #function to calculate the coefficients for the polynomial regression
+poly_eq = np.poly1d(coefficients) #create a polynomial equation
+y_pred = poly_eq(x)
+r2 = r2_score(y, y_pred) #R² value is calculated
+x_line = np.linspace(min(x), max(x), 100)
+y_line = poly_eq(x_line)
+plt.plot(x_line, y_line, label=f'Polynomial Regression (Degree {degree})\nR² = {r2:.4f}') 
+equation = f'${"%.4f" % coefficients[0]} + {"%.4f" % coefficients[1]}x + {"%.4f" % coefficients[2]}x^2$'
+r2_text = f'R² = {"%.4f" % r2}'
+plt.text(0.3, .2, equation, ha='center', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.4, 0.1, r2_text, ha='center', va='center', transform=plt.gca().transAxes)
+#plt.legend()
+plt.savefig('/Users/lucia/Documents/{}3_scatter_plot.png'.format(name))
+plt.close()
+plt.show()
+
+
+# Fit linear regression - ok
+coefficients = np.polyfit(x, y, 1)
+linear_eq = np.poly1d(coefficients)
+y_pred = linear_eq(x)
+# Calculate R²
+r2 = r2_score(y, y_pred)
+# Scatter plot
+plt.scatter(x, y, label='Scatter Plot')
+plt.plot(x, y_pred, label=f'Linear Regression\nR² = {r2:.4f}', color='blue')
+# Add R² to the plot
+equation = f'Linear Equation: y = {linear_eq[1]:.4f}x + {linear_eq[0]:.4f}'
+r2_text = f'R² = {r2:.4f}'
+plt.text(0.3, .2, equation, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.3, .15, r2_text, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+# Customize the plot
+plt.title(name)
+plt.xlabel('Chromosome size')
+plt.ylabel('GC%')
+plt.legend()
+#plt.show()
+plt.savefig('/Users/lucia/Documents/{}_linear3_scatter_plot.png'.format(name),bbox_inches='tight')
+plt.close()
+
+
+plt.scatter(z, y, label='Scatter Plot')
+plt.title(name)
+plt.xlabel('Repetitive fraction %')
+plt.ylabel('GC%')
+degree = 2  # you can adjust the degree of the polynomial
+coefficients = np.polyfit(z, y, degree)
+poly_eq = np.poly1d(coefficients)
+z_pred = poly_eq(y)
+r2 = r2_score(z, z_pred)
+z_line = np.linspace(min(z), max(z), 100)
+y_line = poly_eq(z_line)
+plt.plot(z_line, y_line, label=f'Polynomial Regression (Degree {degree})\nR² = {r2:.4f}') 
+equation = f'${"%.4f" % coefficients[0]} + {"%.4f" % coefficients[1]}x + {"%.4f" % coefficients[2]}x^2$'
+r2_text = f'R² = {"%.4f" % r2}'
+plt.text(0.3, .18, equation, ha='center', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.4, 0.1, r2_text, ha='center', va='center', transform=plt.gca().transAxes)
+#plt.legend()
+plt.savefig('/Users/lucia/Documents/{}4_scatter_plot.png'.format(name))
+plt.close()
+plt.show()
+
+
+# Fit linear regression - ok y = df['GC']*100 GC% z = df['rep']*100 'Rep%'
+#fig = plt.figure(figsize=(9, 11))
+coefficients = np.polyfit(z, y, 1) #
+linear_eq = np.poly1d(coefficients) 
+y_pred = linear_eq(z) #
+# Calculate R²
+r2 = r2_score(y, y_pred)
+#z_line = np.linspace(min(z), max(z), 100)
+# Scatter plot
+plt.scatter(z, y) #
+plt.plot(z, y_pred, label=f'Linear Regression\nR² = {r2:.4f}', color='blue') #
+# Add R² to the plot
+equation = f'Linear Equation: y = {linear_eq[1]:.4f}x + {linear_eq[0]:.4f}'
+r2_text = f'R² = {r2:.4f}'
+plt.text(0.3, .2, equation, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.3, .15, r2_text, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+# Customize the plot
+plt.title(name)
+plt.xlabel('Repetitive fraction %')
+plt.ylabel('GC%')
+plt.legend()
+#plt.show()
+plt.savefig('/Users/lucia/Documents/{}_linear4_scatter_plot.png'.format(name))
+plt.close()
+
+
+plt.scatter(x, z, label='Scatter Plot') #y
+plt.title(name)
+plt.xlabel('Chromosome size')
+plt.ylabel('Rep%')
+degree = 3  # you can adjust the degree of the polynomial
+coefficients = np.polyfit(x, z, degree)
+poly_eq = np.poly1d(coefficients)
+z_pred = poly_eq(x)
+r2 = r2_score(z, z_pred)
+x_line = np.linspace(min(x), max(x), 100)
+z_line = poly_eq(x_line)
+plt.plot(x_line, z_line, label=f'Polynomial Regression (Degree {degree})\nR² = {r2:.4f}') 
+equation = f'${"%.4f" % coefficients[0]} + {"%.4f" % coefficients[1]}x + {"%.4f" % coefficients[2]}x^2$'
+r2_text = f'R² = {"%.4f" % r2}'
+plt.text(0.3, .2, equation, ha='center', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.4, 0.1, r2_text, ha='center', va='center', transform=plt.gca().transAxes)
+#plt.legend()
+plt.savefig('/Users/lucia/Documents/{}5_scatter_plot.png'.format(name))
+plt.close()
+#plt.show()
+
+
+# Fit linear regression
+coefficients = np.polyfit(x, z, 1)
+linear_eq = np.poly1d(coefficients)
+z_pred = linear_eq(x)
+# Calculate R²
+r2 = r2_score(z, z_pred)
+# Scatter plot
+plt.scatter(x, z) #y
+plt.plot(x, z_pred, label=f'Linear Regression\nR² = {r2:.4f}', color='blue')
+# Add R² to the plot
+equation = f'Linear Equation: y = {linear_eq[1]:.4f}x + {linear_eq[0]:.4f}'
+r2_text = f'R² = {r2:.4f}'
+plt.text(0.3, .2, equation, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+plt.text(0.3, .15, r2_text, ha='left', va='center', transform=plt.gca().transAxes, bbox=dict(boxstyle='round', facecolor='white', alpha=0.7))
+# Customize the plot
+plt.title(name)
+plt.xlabel('Chromosome size')
+plt.ylabel('Rep%')
+plt.legend()
+plt.savefig('/Users/lucia/Documents/{}_linear5_scatter_plot.png'.format(name))
+plt.close()
